@@ -84,6 +84,16 @@ public class Server {
                 // Запрос имени
                 out.println("Enter your name:");
                 username = in.readLine();
+
+                // Явная проверка на null и пустоту, чтобы избежать warnings в IDE
+                if (username == null) {
+                    username = "Anonymous";
+                } else if (username.trim().isEmpty()) {
+                    username = "Anonymous";
+                }
+
+                // Добавляем клиента в список перед broadcast
+                server.addClient(this);
                 server.broadcast(username + " has joined the chat");
 
                 // Чтение сообщений
@@ -98,7 +108,20 @@ public class Server {
                 e.printStackTrace();
             } finally {
                 server.removeClient(this);
-                server.broadcast(username + " has left the chat");
+                if (username != null) {
+                    server.broadcast(username + " has left the chat");
+                }
+                // Явное закрытие потоков (для лучшей практики)
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 try {
                     socket.close();
                 } catch (IOException e) {
@@ -108,7 +131,7 @@ public class Server {
         }
 
         public void send(String message) {
-            out.println(DATE_FORMAT.format(new Date()) + " " + message);
+            out.println(message);  // Без добавления даты, как в предыдущей версии
         }
     }
 }

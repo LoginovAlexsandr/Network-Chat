@@ -28,12 +28,13 @@ public class Client {
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              Scanner scanner = new Scanner(System.in)) {
 
-            // Выбор имени
-            System.out.println("Enter your name:");
+            // Читаем запрос имени от сервера (синхронно)
+            String prompt = in.readLine();
+            System.out.println(prompt);
             username = scanner.nextLine();
             out.println(username);
 
-            // Поток для чтения сообщений с сервера
+            // Поток для чтения сообщений с сервера (стартуем после получения имени)
             new Thread(() -> {
                 String message;
                 try {
@@ -42,7 +43,7 @@ public class Client {
                         log(message);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Connection lost: " + e.getMessage());
                 }
             }).start();
 
@@ -54,10 +55,11 @@ public class Client {
                     break;
                 }
                 out.println(message);
+                // Локальное логгирование отправленного сообщения (с username для consistency)
                 log(username + ": " + message);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error connecting to server: " + e.getMessage());
         }
     }
 
